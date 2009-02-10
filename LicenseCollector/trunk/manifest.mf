@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Specification-Title: Apache Ant
+Specification-Version: 1.7.1

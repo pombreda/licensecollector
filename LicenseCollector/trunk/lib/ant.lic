@@ -1,0 +1,6 @@
+Date=2004-2009
+License_Type=Apache Software License 2.0
+Licensor=The Apache Foundation
+Description=Apache Ant is a Java-based build tool. In theory, it is kind of like make, without make's wrinkles.
+Library=apache-ant
+Acknowledgements=See ant.jar/META-INF/NOTICE.txt

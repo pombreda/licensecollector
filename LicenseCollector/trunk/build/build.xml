@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<project name="license" default="license" basedir=".">
+	<property name="root" location=".." />
+	<property environment="env" />
+
+	<taskdef name="lcollector" classname="org.fluidops.ant.task.LicenseCollectorTask" classpath="../bin"/>
+	<target name="license">
+	  <lcollector 
+	  	libraryFolder="${root}/lib" 
+	  	licenseFolder="${root}/licenses" 
+	  	htmlTemplate="${root}/licenses/my3rdparty.html"
+	  	outputFile="${root}/ExampleLicenses.html"/>
+	</target>
+</project>
