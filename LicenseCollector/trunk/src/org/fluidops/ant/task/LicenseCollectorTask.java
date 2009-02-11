@@ -21,72 +21,83 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
+
 /**
- * This small tool is thought of as an ANT task that generates a html file
- * in which all integrated 3rd party libraries are listed with their license
- * specification and acknowlegdements.<p>
- *
- * <pre>
- * #########################################################################
- * TODO: integrate in ANT build xml
  * 
- * Sample integration (will be adopted to jar file)
+ * <b>Introduction</b><p>
+ * 
+ * Many programming projects rely on third party libraries or modules. When embedding those
+ * open source libraries into your product, a proper release documentation must be provided 
+ * in which you document that the particular requirements of the licences are met. <p>
+ * 
+ * In a larger team you can easily loose track of 3rd party libraries that are used in your
+ * project and it is hard keep the release documentation up to date. Hence, we developed 
+ * a little tool which does this work for us: <p>
+ * 
+ * License Collector is an ANT task that generates a html file in which all integrated 
+ * 3rd party libraries are listed with their license specification and acknowlegdements.
+ * The only thing the developer needs to think of is creating an information sheet when 
+ * integrating/commiting libraries. Then this small tool will render a nice Third Party 
+ * License Term List, and your legal counsel will be happy. <p>
+ * 
+ * <br>
+ * <b>Usage</b><p>
+ * 
+ * Introduce the task into your antfile <p>
+ * 
+ * <code>
+ * &lt;taskdef name="lcollector" classname="org.fluidops.ant.task.LicenseCollectorTask" classpath="lcollector.jar"/&gt;
+ * </code><p>
+ * 
+ * Then run your task with<p>
+ * 
+ * <code>
+ * &lt;lcollector   
+ * 		libraryFolder="${root}/lib"
+ * 		licenseFolder="${root}/licenses"
+ * 		htmlTemplate="${root}/licenses/mytemplate.html"
+ * 		outputFile="${root}/3rdparty.html"
+ * /&gt;
+ * </code><p>
+ * 
+ * The parameters are as follows: <p>
+ * <ul>
+ * <li>libraryFolder: root folder of libraries, start for recursive search for .lic files</li>
+ * <li>licenseFolder: folder in which the plain license files are located</li>
+ * <li>outputFile: the file path of the rendered html file</li>
+ * <li>htmlTemplate: optional, a customized html template</li>
+ * </ul>
+ * 
+ * A .lic file looks like this (property file with key-value pairs):<p>
+ * 
  * <pre>
-    <taskdef name="lcollector" classname="org.fluidops.ant.task.LicenseCollectorTask" classpath="lcollector.jar"/>
-    <target name="license">
-      <lcollector 
-        libraryFolder="${root}/lib" 
-        licenseFolder="${root}/licenses" 
-        htmlTemplate="${root}/licenses/mytemplate.html"
-        outputFile="${root}/3rdparty.html"/>
-    </target>
+ * #An example license
+ * Date=2004-2009
+ * License_Type=Apache Software License 2.0
+ * Licensor=The Apache Foundation
+ * Description=Apache Ant is a Java-based build tool. In theory, it is kind of like make, without make's wrinkles.
+ * Library=apache-ant
+ * Acknowledgements=see Notice.txt
  * </pre>
  * 
- * Params:
- *  libraryFolder: root folder of libraries, start for recursive search for .lic files
- *  licenseFolder: folder in which the plain license files are located
- *  outputFile:	   the file path of the rendered html file 
- *  htmpTemplate:  optional, a customized html template
- *
- * #########################################################################
- * </pre>
- *
- * The tool looks in the specified library folder as well as in subfolders for
- * license information files (.lic). These files contain information about license
- * type, licensor and acknowledgments (among some other information). <p>
- *
- *  For each 3rd Party library there should be a .lic file. It is best practice to
- * name it the same way and locate it the same directory as the library. <p>
- *
- * A .lic file looks like this (windows property file with key-value pairs):<p>
- *
- * <pre>
-#An example license
-#Fri Feb 06 11:01:32 CET 2009
-Date=2004-2009
-License_Type=Apache Software License 2.0
-Licensor=The Apache Foundation
-Description=Apache Ant is a Java-based build tool. In theory, it is kind of like make, without make's wrinkles.
-Library=apache-ant
-Acknowledgements=David Megginson david@megginson.com; Joseph Reagle site-policy@w3.org 
- * </pre>
+ * The License_Type denotes the type of the license and in the rendering process the
+ * tool looks for a file called <code>%License_Type%.license</code> in the specified licenseFolder
+ * or its subfolders. It is recommended as good practice to put the '.lic' files in
+ * the same folder where the actual library is located.<p>
  * 
- * The License_Type denotes the type of the license and in the rendering process the tool
- * looks for a file called %License_Type%.license in the specified licenseFolder. This file contains
- * the specification text of the license and will be attached to the rendered html. If 
- * no license file with that file name is found, a special message is rendered in the html.<p>
- *
- * The rendered HTML document contains an %index% as well as a %content% area. The index serves
- * as a kind of menu to navigate to the particular license and the libraries of that license.
- * In the content area the different found licenses are listed. The licenses appear in 
- * alphabetical order.<p>
- *
- * To customize the look of the rendered html, it is possible to modify the template (TODO: 
- * can be found in classpath later).
- *
+ * To render the third party license list, this tool uses a html template, which can
+ * be specified using the ant-parameter <code>html_template</code> (optional; if not specified
+ * a default file will be used). This file contains the basic layout as well as style 
+ * information and it will be used during the rendering process. Each template file should 
+ * have a <i>index</i> and a <i>content</i> placeholder, denoted by <b>%index%</b> and 
+ * <b>%content</b>, respectively. These placeholders will be replaced with the actual content.
+ * 
+ * 
  * @author as
  * @author vc
- *
+ * 
+ * @version 1.0
+ * @date February 10th, 2009
  */
 public class LicenseCollectorTask extends Task  
 {
@@ -140,12 +151,12 @@ public class LicenseCollectorTask extends Task
 	 */
 	private class LicenseInfo 
 	{
-		public String licensor;
-		public String license_type;
-		public String description;
-		public String date;
-		public String acknowledgements;
-		public String library;
+		public String licensor = "";
+		public String license_type = "";
+		public String description = "";
+		public String date = "";
+		public String acknowledgements = "";
+		public String library = "";
 		
 		/**
 		 * Constructor for setup
@@ -169,9 +180,26 @@ public class LicenseCollectorTask extends Task
 		/**
 		 * Returns a String representation of the instance
 		 */
+		@Override
 		public String toString() 
 		{
 			return license_type + " [" + licensor + ", " + description + ", " + date + ", " + acknowledgements + "]: " + library;
+		}
+		
+		
+		/**
+		 * check if instance equals object
+		 * @param obj check if object equals
+		 */
+		@Override
+		public boolean equals( Object obj) {
+			if (obj instanceof LicenseInfo) {
+				LicenseInfo l = (LicenseInfo)obj;
+				return acknowledgements.equals(l.acknowledgements) && date.equals(l.date) && description.equals(l.description)
+							&& library.equals(l.library) && license_type.equals(l.license_type) && licensor.equals(l.licensor);
+			}
+			
+			return false;
 		}
 	}
 	
@@ -251,7 +279,11 @@ public class LicenseCollectorTask extends Task
 			licenseList = new ArrayList<LicenseInfo>();
 			licenseMap.put(licenseType, licenseList);
 		}
-		licenseList.add( new LicenseInfo(props.getProperty(LICENSOR), props.getProperty(LICENSE_TYPE),props.getProperty(DESCRIPTION),props.getProperty(DATE),props.getProperty(ACKNOWLEDGEMENTS),props.getProperty(LIBRARY)));
+		
+		// check for duplicates, if not -> add it to list
+		LicenseInfo li = new LicenseInfo(props.getProperty(LICENSOR), props.getProperty(LICENSE_TYPE),props.getProperty(DESCRIPTION),props.getProperty(DATE),props.getProperty(ACKNOWLEDGEMENTS),props.getProperty(LIBRARY));
+		if (!licenseList.contains(li))
+			licenseList.add(li);
 	}
 		
 	/**
@@ -262,8 +294,8 @@ public class LicenseCollectorTask extends Task
 	 */
 	private void renderLicenseType( String licenseType, ArrayList<LicenseInfo> licenseInfos) throws Exception 
 	{	
-		index_buffer.append("<li><a href=\"#" + licenseType.replace(" ", "_") + "\" class=\"link\">" + licenseType + "</a></li>");
-		content_buffer.append("<p /><a name=\"" + licenseType.replace(" ", "_") + "\"/><h2>" + licenseType + "</h2><p />");
+		index_buffer.append("<li><a href=\"#" + licenseType.replace(" ", "_") + "\">" + licenseType + "</a></li>");
+		content_buffer.append("<p /><a name=\"" + licenseType.replace(" ", "_") + "\"></a><h2>" + licenseType + "</h2><p />");
 		
 		// try to render the license as pre text
 		{
@@ -310,7 +342,7 @@ public class LicenseCollectorTask extends Task
 			String template = "<tr><td>" + Integer.toString(++count) + "</td><td>" + info.licensor + "</td><td>" + info.library + "</td><td>" + info.description + "</td><td>" + info.date + "</td><td>"+ info.acknowledgements +"</td></tr>";
 			content_buffer.append( template + '\n' );
 		}
-		content_buffer.append("</tbody></table>&#xBB; <a href=\"#top\" class=\"link\" style=\"font-size:0.76em;s\">top</a><p>&nbsp;</p>");
+		content_buffer.append("</tbody></table>&#xBB; <a href=\"#top\" style=\"font-size:0.76em;s\">top</a><p>&nbsp;</p>");
 	}
 	
 	
