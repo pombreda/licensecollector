@@ -1,4 +1,6 @@
+#summary Home
 #labels Featured
+
 = Introduction =
 
 Many programming projects rely on other libraries or modules. E.g. when embedding open source libraries a proper release documentation must be created where the requirements of the licences are met.
@@ -44,4 +46,4 @@ Library=apache-ant
 Acknowledgements=see Notice.txt
 }}}
 
-The "License_Type" denotes the type of the license and in the rendering process the tool looks for a file called %License_Type%.license in the specified licenseFolder.
+The `License_Type` denotes the type of the license and in the rendering process the tool looks for a file called `%License_Type%.license` in the specified licenseFolder.
