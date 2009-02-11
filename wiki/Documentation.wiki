@@ -47,3 +47,6 @@ Acknowledgements=see Notice.txt
 }}}
 
 The `License_Type` denotes the type of the license and in the rendering process the tool looks for a file called `%License_Type%.license` in the specified licenseFolder or its subfolders. It is recommended as good practice to put the '.lic' files in the same folder where the actual library is located.
+
+To render the third party license list, this tool uses a html template, which can be specified using the ant-parameter 'html_template' (optional; if not specified a default file will be used). This file contains the basic layout as well as style information and it will be used during the rendering process. Each template file should have a <i>index</i> and a <i>content</i> placeholder, denoted by <b>%index%</b> and 
+<b>%content</b>, respectively. These placeholders will be replaced with the actual content.
