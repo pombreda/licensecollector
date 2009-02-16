@@ -1,0 +1,7 @@
+Date=2006
+License_Type=CUSTOM
+License_Text=I have released this software into the Public Domain. That \nmeans you can do whatever you want with it. Really. You don't have to match \nit up with any other open source license &em; just use it. You can rename \nthe files, move the Java packages, whatever you want. If your lawyers say \nyou have to have a license, contact me, and I'll make a special release to \nyou under whatever reasonable license you desire: MIT, BSD, GPL, whatever.
+Licensor=iHarder.net 
+Description=A library in Java for Base64 
+Library=Base64 
+Acknowledgements=

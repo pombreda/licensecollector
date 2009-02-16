@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
@@ -108,6 +109,7 @@ public class LicenseCollectorTask extends Task
 	public static String DATE = "Date";
 	public static String ACKNOWLEDGEMENTS = "Acknowledgements";
 	public static String LIBRARY = "Library";
+	public static String CUSTOM_LICENSE = "License_Text";
 	
 	/* class variables */
 	private HashMap<String, ArrayList<LicenseInfo>> licenseMap = new HashMap<String, ArrayList<LicenseInfo>>();
@@ -157,6 +159,7 @@ public class LicenseCollectorTask extends Task
 		public String date = "";
 		public String acknowledgements = "";
 		public String library = "";
+		public String customLicense = "";
 		
 		/**
 		 * Constructor for setup
@@ -167,7 +170,7 @@ public class LicenseCollectorTask extends Task
 		 * @param acknowledgements
 		 * @param library
 		 */
-		public LicenseInfo(String licensor, String license_type, String description, String date, String acknowledgements, String library) 
+		public LicenseInfo(String licensor, String license_type, String description, String date, String acknowledgements, String library, String customLicense) 
 		{
 			this.licensor = licensor;
 			this.license_type = license_type;
@@ -175,6 +178,7 @@ public class LicenseCollectorTask extends Task
 			this.date = date;
 			this.acknowledgements = acknowledgements;
 			this.library = library;
+			this.customLicense = customLicense;
 		}
 		
 		/**
@@ -232,8 +236,13 @@ public class LicenseCollectorTask extends Task
 		// work with the input
 		Set<String> licenseTypes = new TreeSet<String>();
 		licenseTypes.addAll( licenseMap.keySet() );
-		for (String licenseType : licenseTypes)
-			renderLicenseType( licenseType, licenseMap.get( licenseType));
+		for (String licenseType : licenseTypes) {
+			if (licenseType.equals("CUSTOM"))
+				renderCustomLicenses( licenseMap.get( licenseType));
+			else
+				renderLicenseType( licenseType, licenseMap.get( licenseType) );
+		}
+			
 				
 		// render content by using template
 		readAndRenderContent();
@@ -281,7 +290,12 @@ public class LicenseCollectorTask extends Task
 		}
 		
 		// check for duplicates, if not -> add it to list
-		LicenseInfo li = new LicenseInfo(props.getProperty(LICENSOR), props.getProperty(LICENSE_TYPE),props.getProperty(DESCRIPTION),props.getProperty(DATE),props.getProperty(ACKNOWLEDGEMENTS),props.getProperty(LIBRARY));
+		String customLicense = null;
+		if (licenseType.equals("CUSTOM")) {
+			customLicense = props.getProperty(CUSTOM_LICENSE); 
+		}
+		
+		LicenseInfo li = new LicenseInfo(props.getProperty(LICENSOR), licenseType,props.getProperty(DESCRIPTION),props.getProperty(DATE),props.getProperty(ACKNOWLEDGEMENTS),props.getProperty(LIBRARY), customLicense);
 		if (!licenseList.contains(li))
 			licenseList.add(li);
 	}
@@ -290,6 +304,7 @@ public class LicenseCollectorTask extends Task
 	 * Render a license type to html code and attach it to the content-string buffer
 	 * @param licenseType
 	 * @param licenseInfos
+	 * @param customLicense
 	 * @throws Exception
 	 */
 	private void renderLicenseType( String licenseType, ArrayList<LicenseInfo> licenseInfos) throws Exception 
@@ -301,8 +316,8 @@ public class LicenseCollectorTask extends Task
 		{
 		    BufferedReader lr = null;
 		    
-    		File license = new File( this.licenseFolderPath + "/" + licenseType + ".license");
-    		if (!license.exists()) 
+		    File license = new File( this.licenseFolderPath + "/" + licenseType + ".license");
+		    if (!license.exists()) 
     		{
     		    //try if already delivered in jar
     	        InputStream in = getClass().getResourceAsStream("/org/fluidops/ant/task/" + licenseType + ".license");
@@ -344,6 +359,46 @@ public class LicenseCollectorTask extends Task
 		}
 		content_buffer.append("</tbody></table>&#xBB; <a href=\"#top\" style=\"font-size:0.76em;s\">top</a><p>&nbsp;</p>");
 	}
+	
+	
+	
+	
+	private void renderCustomLicenses(  ArrayList<LicenseInfo> licenseInfos ) throws Exception {
+		
+		for (int i=0; i<licenseInfos.size();i++) {
+			String customLicense = licenseInfos.get(i).customLicense;
+			
+			index_buffer.append("<li><a href=\"#" + "CustomLicense"+(i+1) + "\">" + "Custom License " + (i+1)  + "</a></li>");
+			content_buffer.append("<p /><a name=\"" + "CustomLicense"+(i+1) + "\"></a><h2>" + "Custom License " + (i+1) + "</h2><p />");
+			
+			BufferedReader lr = new BufferedReader( new StringReader( customLicense));
+			content_buffer.append("<pre>");
+			String line = lr.readLine();
+			while (line!=null) 
+			{
+				content_buffer.append( line + '\n' );
+				line = lr.readLine();
+			}
+			content_buffer.append("</pre>");
+			lr.close();
+			
+			content_buffer.append("<br /><span style=\"font-size:0.86em; font-weight: bold;\">Copyright Notice and Attribution Chart:</span><br /><br />");
+			content_buffer.append("<table width=\"600px\" border=\"1\" class=\"liTable\" style=\"border:1px solid black; border-collapse:collapse;\"><thead>");
+			content_buffer.append("<tr><th width=\"5%\">No</th><th width=\"20%\">Licensor</th><th width=\"15%\">Library</th><th width=\"30%\">Description</th><th width=\"10%\">Date(s)</th><th width=\"20%\">Acknowledgements</th></tr>");
+			content_buffer.append("</thead><tbody>");
+
+			LicenseInfo info = licenseInfos.get(i);
+			log( info.toString(), Project.MSG_VERBOSE );
+			String template = "<tr><td>" + Integer.toString(1) + "</td><td>" + info.licensor + "</td><td>" + info.library + "</td><td>" + info.description + "</td><td>" + info.date + "</td><td>"+ info.acknowledgements +"</td></tr>";
+			content_buffer.append( template + '\n' );
+		
+			content_buffer.append("</tbody></table>&#xBB; <a href=\"#top\" style=\"font-size:0.76em;s\">top</a><p>&nbsp;</p>");
+
+		}
+		 
+		    
+	}
+	
 	
 	
 	/**
