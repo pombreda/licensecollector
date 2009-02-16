@@ -50,9 +50,11 @@ The `License_Type` denotes the type of the license and in the rendering process 
 
 This means that you can easily use custom licenses:
 
- *  create a .license file (plain text) and put it into your licenses folder (the folder is specified from within the ant task)
- *  in the .lic file set the `License_Type` to the file name of your created .license file `(`e.g. `MyCustomLicense.license` will be `License_Type=MyCustomLicense)`
- *  the tool will do the rendering for you
+<ul>
+ <li>create a .license file (plain text) and put it into your licenses folder (the folder is specified from within the ant task)</li>
+ <li>in the .lic file set the `License_Type` to the file name of your created .license file `(`e.g. `MyCustomLicense.license` will be `License_Type=MyCustomLicense)`</li>
+ <li>the tool will do the rendering for you</li>
+</ul>
 
 To render the third party license list, this tool uses a html template, which can be specified using the ant-parameter `html_template` (optional; if not specified a default file will be used). This file contains the basic layout as well as style information and it will be used during the rendering process. Each template file should have a <i>index</i> and a <i>content</i> placeholder, denoted by <b>%index%</b> and 
 <b>%content</b>, respectively. These placeholders will be replaced with the actual content.
