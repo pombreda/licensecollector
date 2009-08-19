@@ -282,6 +282,10 @@ public class LicenseCollectorTask extends Task
 		
 		String licenseType = props.getProperty( LICENSE_TYPE);
 		
+		//return if no property file
+		if(licenseType==null)
+		    return;
+		
 		ArrayList<LicenseInfo> licenseList = licenseMap.get( licenseType );
 		if ( licenseList==null ) 
 		{
@@ -499,7 +503,7 @@ public class LicenseCollectorTask extends Task
 			{
 				if (files[i].isDirectory())
 					recursiveFileScan( files[i], result);
-				else if (files[i].getName().endsWith("lic"))
+				else if (files[i].getName().endsWith(".lic"))
 					result.add( files[i]);
 			}
 		}
