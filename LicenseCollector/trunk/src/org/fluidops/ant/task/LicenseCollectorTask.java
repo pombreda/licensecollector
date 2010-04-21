@@ -277,8 +277,11 @@ public class LicenseCollectorTask extends Task
 	private void handleLicenseFile( File f) throws Exception 
 	{
 		log("Handling file: " + f.getAbsolutePath(), Project.MSG_VERBOSE );
+		
 		Properties props = new Properties();
-		props.load( new FileInputStream(f));
+		FileInputStream fips = new FileInputStream( f );
+		props.load( fips );
+		fips.close();
 		
 		String licenseType = props.getProperty( LICENSE_TYPE);
 		
